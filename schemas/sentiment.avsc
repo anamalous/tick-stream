@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "NewsSentiment",
+  "namespace": "com.alpha.news",
+  "fields": [
+    {"name": "source", "type": "string"},
+    {"name": "headline", "type": "string"},
+    {"name": "sentiment_score", "type": ["null", "float"], "default": null},
+    {
+      "name": "created_at",
+      "type": {"type": "long", "logicalType": "timestamp-micros"}
+    }
+  ]
+}

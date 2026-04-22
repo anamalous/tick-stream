@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "Trade",
+  "namespace": "com.alpha.market",
+  "fields": [
+    {"name": "ticker", "type": "string"},
+    {"name": "price", "type": "double"},
+    {"name": "size", "type": "long"},
+    {"name": "exchange", "type": "string"},
+    {
+      "name": "timestamp",
+      "type": {"type": "long", "logicalType": "timestamp-micros"}
+    }
+  ]
+}
