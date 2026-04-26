@@ -3,3 +3,7 @@ spark-warehouse/
 *.docx
 command-sheet.txt
 trade_env/
+data/
+test.py
+__pycache__
+spark_display.py

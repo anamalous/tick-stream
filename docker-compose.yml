@@ -6,9 +6,14 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - ./data/zookeeper/data:/var/lib/zookeeper/data
+      - ./data/zookeeper/log:/var/lib/zookeeper/log
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
+    volumes:
+      - ./data/kafka/data:/var/lib/kafka/data
     depends_on:
       - zookeeper
     ports:
@@ -26,13 +31,15 @@ services:
     depends_on:
       - kafka
     ports:
-      - "8081:8081"
+      - "8081:8081" # host : container
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
 
   minio:
     image: minio/minio
+    volumes:
+      - ./data/minio:/data
     ports:
       - "9000:9000"
       - "9001:9001"
