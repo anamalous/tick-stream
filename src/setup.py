@@ -1,7 +1,6 @@
 import requests
 from pyspark.sql import SparkSession
-
-
+   
 def get_latest_schema(subject): # fetch latest schema from Registry (for decoding)
     res = requests.get(f"http://localhost:8081/subjects/{subject}/versions/latest")
     return res.json()['schema']
@@ -13,7 +12,7 @@ def get_spark(): # initialize Spark with Iceberg and AWS configurations
         _spark = SparkSession.builder \
             .appName("AlphaEngine-Ingestion") \
             .config("spark.jars.packages", 
-                "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,"  # Matches Spark 3.5
+                "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,"
                 "org.apache.spark:spark-avro_2.12:3.5.3,"
                 "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0," 
                 "org.apache.hadoop:hadoop-aws:3.3.4,"
@@ -26,6 +25,10 @@ def get_spark(): # initialize Spark with Iceberg and AWS configurations
             .config("spark.hadoop.fs.s3a.access.key", "admin") \
             .config("spark.hadoop.fs.s3a.secret.key", "password") \
             .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+            .config("spark.local.dir", "E:/spark_tmp") \
+            .config("spark.sql.shuffle.partitions", "2") \
+            .config("spark.default.parallelism", "2") \
+            .config("spark.sql.streaming.stateStore.maintenanceInterval", "1s") \
             .getOrCreate()
     return _spark
         

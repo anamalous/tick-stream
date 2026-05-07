@@ -75,6 +75,28 @@ services:
       - AWS_REGION=us-east-1
     volumes:
       - ./work-dir:/opt/spark/work-dir
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis_speed_layer
+    ports:
+      - "6379:6379"
+    networks:
+      - stream_network
+    restart: always
+
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: redis_insight_gui
+    ports:
+      - "5540:5540"
+    networks:
+      - stream_network
+    depends_on:
+      - redis
+
 networks:
   default:
     name: alpha-network
+  stream_network:
+    driver: bridge

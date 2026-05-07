@@ -5,18 +5,18 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.serialization import SerializationContext, MessageField
 from confluent_kafka import Producer
 
-# 1. Setup Schema Registry Client
+# Setup Schema Registry Client
 sr_config = {'url': 'http://localhost:8081'}
 schema_registry_client = SchemaRegistryClient(sr_config)
 
-# 2. Fetch latest schema from the registry - sync maintained
+# Fetch latest schema from the registry - sync maintained
 subject_name = 'market-trades-raw-value'
 schema_str = schema_registry_client.get_latest_version(subject_name).schema.schema_str
 
-# 3. Define Serializer
+# Define Serializer
 avro_serializer = AvroSerializer(schema_registry_client, schema_str)
 
-# 4. Setup Kafka Producer
+# Setup Kafka Producer
 producer_config = {
     'bootstrap.servers': 'localhost:9092',
 }

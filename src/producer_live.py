@@ -9,7 +9,7 @@ from confluent_kafka import Producer
 sr_config = {'url': 'http://localhost:8081'}
 schema_registry_client = SchemaRegistryClient(sr_config)
 
-subject_name = 'market-trades-raw-value'
+subject_name = 'market-trade-raw-value'
 schema_str = schema_registry_client.get_latest_version(subject_name).schema.schema_str
 avro_serializer = AvroSerializer(schema_registry_client, schema_str)
 
@@ -28,12 +28,11 @@ async def binance_stream():
         
         while True:
             try:
-                # 1. Receive raw JSON from Binance
+                # receive raw JSON from Binance
                 msg = await ws.recv()
                 data = json.loads(msg)
                 
-                # 2. Map Binance response to YOUR Avro Schema
-                # Binance keys: 's'=ticker, 'p'=price, 'q'=quantity, 'E'=EventTime
+                # map Binance response to Avro Schema
                 trade_data = {
                     "ticker": data['s'],
                     "price": float(data['p']),
@@ -42,7 +41,7 @@ async def binance_stream():
                     "timestamp": int(data['E'] * 1000)
                 }
 
-                # 3. Serialize and Produce to Kafka
+                # Serialize and Produce to Kafka
                 ctx = SerializationContext('market-trades-raw', MessageField.VALUE)
                 
                 producer.produce(
