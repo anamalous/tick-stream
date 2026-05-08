@@ -120,58 +120,43 @@ const NewsFeed = () => {
     return () => clearInterval(interval);
   }, []);
 
- return (
-  <div className="bg-neutral-900/20 border border-neutral-800/50 rounded-3xl p-6 flex flex-col h-[600px] shadow-2xl backdrop-blur-sm">
-    {/* Header */}
-    <div className="flex items-center justify-between mb-6 border-b border-neutral-800 pb-4">
-      <div className="flex items-center gap-2">
-        <div className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-        <h2 className="text-[10px] font-black tracking-[0.2em] uppercase text-neutral-500">Intel Stream</h2>
+  return (
+    <div className="bg-neutral-950/50 border border-neutral-800 rounded-3xl p-6 flex flex-col h-[calc(100vh-280px)] sticky top-8">
+      {/* HEADER SECTION */}
+      <div className="flex items-center gap-2 mb-6 border-b border-neutral-800/50 pb-4 shrink-0">
+        <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+        <h2 className="text-xs font-black tracking-[0.2em] uppercase text-neutral-500">Live Intel Feed</h2>
       </div>
-      <span className="text-[9px] font-mono text-neutral-600 uppercase">Live_Updates</span>
-    </div>
-    
-    {/* News List Container - Fixed height with scroll */}
-    <div className="flex-1 overflow-y-auto pr-2 space-y-5 custom-scrollbar">
-      {news.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full space-y-2 opacity-20">
-          <div className="w-8 h-px bg-neutral-500"></div>
-          <p className="text-[10px] uppercase font-bold tracking-widest">Awaiting Packets</p>
-        </div>
-      ) : (
-        news.map((item, i) => (
-          <div key={i} className="group relative pl-4 border-l border-neutral-800 hover:border-blue-500 transition-all duration-300">
-            {/* Ticker and Sentiment Tag */}
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-sm tracking-tighter uppercase ${
+      
+      {/* SCROLLABLE CONTENT AREA */}
+      <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+        {news.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full opacity-20">
+             <p className="text-xs font-mono uppercase tracking-tighter">Connecting to Reuters/Alpha Stream...</p>
+          </div>
+        )}
+        
+        {Array.isArray(news) && news.length > 0 ? news.map((item, i) => (
+          <div key={i} className="group border-l border-neutral-800 hover:border-blue-500/50 pl-4 py-1 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <span className={`text-[9px] font-black px-2 py-0.5 rounded tracking-widest uppercase ${
                 item.sentiment === 'bullish' ? 'bg-emerald-500/10 text-emerald-500' : 
                 item.sentiment === 'bearish' ? 'bg-rose-500/10 text-rose-500' : 'bg-neutral-800 text-neutral-400'
               }`}>
                 {item.ticker}
               </span>
-              <span className="text-[9px] font-mono text-neutral-700">
-                {item.timestamp ? new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'LIVE'}
+              <span className="text-[9px] font-mono text-neutral-600">
+                {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
-            
-            {/* Headline */}
-            <p className="text-[13px] text-neutral-400 leading-snug group-hover:text-neutral-100 transition-colors font-medium">
+            <p className="text-sm text-neutral-400 leading-snug group-hover:text-white transition-colors cursor-default font-medium">
               {item.headline}
             </p>
           </div>
-        ))
-      )}
+        )) : null}
+      </div>
     </div>
-    
-    {/* CSS for custom scrollbar (Add this to your index.css if possible) */}
-    <style>{`
-      .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: #262626; border-radius: 10px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #404040; }
-    `}</style>
-  </div>
-);
+  );
 };
 
 export default function App() {
