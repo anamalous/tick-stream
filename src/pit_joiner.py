@@ -46,8 +46,6 @@ def dual_write_sink(batch_df, batch_id):
     print(f"✅ Batch {batch_id} processed with Features.")
  
 spark.sql("CREATE NAMESPACE IF NOT EXISTS local.analytics_zone")
-# sync table schema with your new feature logic
-spark.sql("ALTER TABLE local.analytics_zone.enriched_signals ADD COLUMNS (sma_5 DOUBLE, volatility DOUBLE, signal STRING)")
 
 candles_df = spark.readStream \
     .format("iceberg") \

@@ -14,7 +14,7 @@ app.add_middleware(
 )
 
 # cache connection
-r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+r = redis.Redis(host='localhost', port=6379, db=0)
 
 @app.get("/")
 def read_root():
@@ -39,6 +39,31 @@ def get_all_signals():
     for key in keys:
         results.append(json.loads(r.get(key)))
     return results
+
+@app.get("/macro/vitals")
+def get_macro_vitals():
+    """Fetch all latest global macro indicators from Redis"""
+    keys = r.keys("indicator:*") 
+    vitals = {}
+    for key in keys:
+        data = r.get(key)
+        if data:
+            indicator_name = key.decode().split(":")[1]
+            vitals[indicator_name] = json.loads(data)
+    return vitals
+
+@app.get("/news/recent")
+def get_recent_news():
+    try:
+        news_list = r.lrange("recent_news", 0, 9)
+        formatted_news = []
+        for n in news_list:
+            formatted_news.append(json.loads(n.decode('utf-8')))
+            
+        return formatted_news
+    except Exception as e:
+        print(f"❌ Redis Parsing Error: {e}")
+        return []
 
 if __name__ == "__main__":
     import uvicorn

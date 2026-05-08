@@ -37,13 +37,13 @@ try:
             "ticker": random.choice(["BTCUSDT", "ETHUSDT"]),
             "source": random.choice(["Twitter", "Reuters", "Bloomberg"]),
             "headline": random.choice(headlines), 
-            "sentiment_score": float(random.uniform(-1.0, 1.0)),
+            "sentiment_score": 0,
             "created_at": now_micros
         }
-        ctx = SerializationContext('market-sentiment-raw', MessageField.VALUE)
+        ctx = SerializationContext('market-news-raw', MessageField.VALUE)
                 
         producer.produce(
-            topic='market-sentiment-raw',
+            topic='market-news-raw',
             value=avro_serializer(data, ctx),
             on_delivery=delivery_report
         )

@@ -84,6 +84,8 @@ services:
     networks:
       - stream_network
     restart: always
+    volumes:
+      - redis_data:/data
 
   redis-insight:
     image: redislabs/redisinsight:latest
@@ -100,3 +102,5 @@ networks:
     name: alpha-network
   stream_network:
     driver: bridge
+volumes:
+  redis_data:
