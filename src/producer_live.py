@@ -1,4 +1,6 @@
 import asyncio
+import time
+import redis
 import websockets
 import json
 from confluent_kafka.schema_registry.avro import AvroSerializer
@@ -31,6 +33,18 @@ async def binance_stream():
                 # receive raw JSON from Binance
                 msg = await ws.recv()
                 data = json.loads(msg)
+
+                ticker = data['s']
+                history_key = f"history:{ticker}"
+
+                payload = {
+                    "price": float(data['p']),
+                    "timestamp": int(time.time())
+                }
+                
+                r = redis.Redis(host='localhost', port=6379, db=0)
+                r.lpush(history_key, json.dumps(payload)) # push to front
+                r.ltrim(history_key, 0, 99) # keep only last 100
                 
                 # map Binance response to Avro Schema
                 trade_data = {

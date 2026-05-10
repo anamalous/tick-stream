@@ -7,9 +7,12 @@ import sys
 from pyspark.sql.functions import col, expr
 from setup import get_spark, get_latest_schema
 from pyspark.sql.avro.functions import from_avro
+from dotenv import load_dotenv
 
-os.environ['HADOOP_HOME'] = "E:/hadoop"
-sys.path.append("E:/hadoop/bin")
+load_dotenv()
+# environment set-up
+os.environ['HADOOP_HOME'] = os.getenv("HADOOP_PATH")
+sys.path.append(os.getenv("HADOOP_PATH")+"/bin")
 
 spark = get_spark()
 
@@ -73,14 +76,14 @@ enriched_df = candles_df.join(
     sentiment_df,
     expr("""
         ticker = news_ticker AND
-        news_ts >= candle_ts - interval 24 hours AND 
-        news_ts <= candle_ts + interval 24 hours
+        news_ts >= candle_ts - interval 30 minutes AND 
+        news_ts <= candle_ts + interval 30 minutes
     """),
     "left"
 )
 query = enriched_df.writeStream \
     .foreachBatch(dual_write_sink) \
-    .option("checkpointLocation", "E:/warehouse/checkpoints/enriched_signals_v3_fresh") \
+    .option("checkpointLocation", "s3a://warehouse/checkpoints/enriched_signals_v3_fresh") \
     .start()
 
 print("🔗 PiT Joiner is active. Linking headlines to price action...")

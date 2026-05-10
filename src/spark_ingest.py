@@ -4,9 +4,12 @@ from pyspark.sql.functions import col, current_timestamp, expr
 from pyspark.sql.avro.functions import from_avro
 from gx_context import get_validation_def
 from setup import get_latest_schema, get_spark
+from dotenv import load_dotenv
 
-os.environ['HADOOP_HOME'] = "E:/hadoop"
-sys.path.append("E:/hadoop/bin")
+load_dotenv()
+# environment set-up
+os.environ['HADOOP_HOME'] = os.getenv("HADOOP_PATH")
+sys.path.append(os.getenv("HADOOP_PATH")+"/bin")
 
 trade_schema_json = get_latest_schema("market-trades-raw-value")
 spark = get_spark()

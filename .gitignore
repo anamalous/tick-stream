@@ -7,3 +7,4 @@ data/
 test.py
 __pycache__
 spark_display.py
+.env

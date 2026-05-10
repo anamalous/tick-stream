@@ -26,9 +26,12 @@ def get_spark(): # initialize Spark with Iceberg and AWS configurations
             .config("spark.hadoop.fs.s3a.secret.key", "password") \
             .config("spark.hadoop.fs.s3a.path.style.access", "true") \
             .config("spark.local.dir", "E:/spark_tmp") \
+            .config("spark.ui.enabled", "false") \
             .config("spark.driver.host", "127.0.0.1") \
             .config("spark.driver.bindAddress", "127.0.0.1") \
-            .config("spark.master", "local[2]") \
+            .config("spark.master", "local[*]") \
+            .config("spark.driver.memory", "2g") \
+            .config("spark.executor.memory", "2g") \
             .config("spark.driver.extraJavaOptions", "-Djava.net.preferIPv4Stack=true") \
             .config("spark.executor.extraJavaOptions", "-Djava.net.preferIPv4Stack=true") \
             .config("spark.sql.shuffle.partitions", "2") \

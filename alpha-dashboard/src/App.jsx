@@ -1,4 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createChart, AreaSeries } from 'lightweight-charts';
+
+const RealTimeChart = ({ ticker, color = "#10b981" }) => {
+  const chartContainerRef = useRef();
+  const seriesRef = useRef();
+
+  useEffect(() => {
+    if (!chartContainerRef.current) return;
+    
+    const chart = createChart(chartContainerRef.current, {
+      layout: { 
+        background: { color: 'transparent' }, 
+        textColor: '#525252' 
+      },
+      grid: { vertLines: { visible: false }, horzLines: { color: '#171717' } },
+      width: chartContainerRef.current.clientWidth,
+      height: 120,
+      timeScale: { visible: false },
+      rightPriceScale: { borderVisible: false },
+      handleScale: false,
+      handleScroll: false,
+    });
+
+    const series = chart.addSeries(AreaSeries,{
+      lineColor: color,
+      topColor: `${color}33`,
+      bottomColor: 'transparent',
+      lineWidth: 2,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+
+    seriesRef.current = series;
+
+    const fetchChartData = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/history/${ticker}`);
+        const rawData = await res.json();
+
+        if (rawData && Array.isArray(rawData) && rawData.length > 0) {
+          // sort by time ascending
+          const sorted = [...rawData].sort((a, b) => a.time - b.time);
+
+          const uniqueData = sorted.filter((item, index, self) =>
+            index === 0 || item.time > self[index - 1].time
+          );
+
+          seriesRef.current.setData(uniqueData);
+          chart.timeScale().fitContent();
+        }
+      } catch (err) {
+        console.error("Chart data error:", err);
+      }
+    };
+
+    fetchChartData();
+    const interval = setInterval(fetchChartData, 5000);
+
+    const handleResize = () => chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chart.remove();
+    };
+  }, [ticker]);
+
+  return <div ref={chartContainerRef} className="w-full mt-4" />;
+};
 
 const SignalCard = ({ ticker }) => {
   const [data, setData] = useState(null);
@@ -17,7 +86,6 @@ const SignalCard = ({ ticker }) => {
     return () => clearInterval(interval);
   }, [ticker]);
 
-  // SKELETON LOADING STATE (MUCH PRETTIER)
   if (!data) return (
     <div className="p-6 bg-neutral-900 border border-neutral-800 rounded-3xl animate-pulse space-y-4">
       <div className="flex justify-between">
@@ -34,12 +102,10 @@ const SignalCard = ({ ticker }) => {
   const color = isBuy ? 'emerald' : 'rose';
 
   return (
-    // CARD CONTAINER - Sleek, Rounded, Depth
     <div className={`
       p-6 rounded-3xl bg-neutral-950 border border-neutral-800 shadow-[0_0_60px_-10px_rgba(0,0,0,0.7)]
       transition-all duration-300 ease-out hover:scale-[1.02] hover:-translate-y-1 hover:border-${color}-900
     `}>
-      {/* Ticker and Signal Badge */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-sm font-bold tracking-[0.2em] text-neutral-500 uppercase">{data.ticker}</h2>
         <span className={`
@@ -50,15 +116,13 @@ const SignalCard = ({ ticker }) => {
         </span>
       </div>
       
-      {/* The Price - Big, Mono, Professional */}
       <div className={`
         text-6xl font-mono font-bold text-white tracking-tighter leading-none
         bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent
       `}>
         ${parseFloat(data.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </div>
-
-      {/* The Sentiment Footer */}
+      <RealTimeChart ticker={data.ticker} color={isBuy ? '#10b981' : '#f43f5e'} />
       <div className="mt-8 border-t border-neutral-800 pt-6 space-y-2">
         <p className="text-[10px] text-neutral-500 uppercase font-black tracking-[0.25em]">Sentiment Engine Basis</p>
         <p className="text-sm text-neutral-300 italic font-medium leading-relaxed line-clamp-2">
@@ -82,7 +146,7 @@ const MacroHeader = () => {
     };
 
     fetchMacros();
-    const interval = setInterval(fetchMacros, 5000); // Macros change slowly, 5s is plenty
+    const interval = setInterval(fetchMacros, 5000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -121,14 +185,13 @@ const NewsFeed = () => {
   }, []);
 
   return (
-    <div className="bg-neutral-950/50 border border-neutral-800 rounded-3xl p-6 flex flex-col h-[calc(100vh-280px)] sticky top-8">
+    <div className="bg-neutral-950/50 border border-neutral-800 rounded-3xl p-6 flex flex-col h-[calc(100vh-240px)] sticky top-8">
       {/* HEADER SECTION */}
       <div className="flex items-center gap-2 mb-6 border-b border-neutral-800/50 pb-4 shrink-0">
         <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
         <h2 className="text-xs font-black tracking-[0.2em] uppercase text-neutral-500">Live Intel Feed</h2>
       </div>
       
-      {/* SCROLLABLE CONTENT AREA */}
       <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
         {news.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full opacity-20">
@@ -192,7 +255,6 @@ export default function App() {
         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
           <SignalCard ticker="BTCUSDT" />
           <SignalCard ticker="ETHUSDT" />
-          {/* Add more tickers here if needed */}
         </div>
 
         {/* RIGHT COLUMN: News Feed (Spans 4 of 12 columns) */}

@@ -65,6 +65,18 @@ def get_recent_news():
         print(f"❌ Redis Parsing Error: {e}")
         return []
 
+@app.get("/history/{ticker}")
+def get_ticker_history(ticker: str):
+    raw_history = r.lrange(f"history:{ticker}", 0, 50)
+    history = []
+    for item in reversed(raw_history):
+        d = json.loads(item)
+        history.append({
+            "time": d['timestamp'],
+            "value": float(d['price'])
+        })
+    return history
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
